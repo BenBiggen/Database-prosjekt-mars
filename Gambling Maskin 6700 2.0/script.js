@@ -9,12 +9,26 @@ let hand = []
 let house = []
 
 for (let n = 0; n<2; n++) {
-    let tilfeldig = deck[Math.floor(Math.random()*deck.length)]
+    let tilfeldigHand = deck[Math.floor(Math.random()*deck.length)]
+    let indexHand = deck.indexOf(tilfeldigHand)
+    console.log(indexHand)
+    deck.splice(indexHand, 1)
+    hand.push(tilfeldigHand)
+
     let tilfeldigHouse = deck[Math.floor(Math.random()*deck.length)]
-    hand.push(tilfeldig)
+    let indexHouse = deck.indexOf(tilfeldigHouse)
+    console.log(indexHouse)
+    deck.splice(indexHouse, 1)
     house.push(tilfeldigHouse)
+
+
+    let handSide = document.createElement("playing-card")
+    handSide.setAttribute("cid", `${hand[n]}`)
+
+    
 }
 
 
 console.log("hand: "+hand)
 console.log("house: "+house)
+console.log(deck)
