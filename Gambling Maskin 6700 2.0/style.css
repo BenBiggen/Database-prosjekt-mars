@@ -2,3 +2,30 @@ playing-card {
     display: inline-block;
     width: 100px;
 }
+
+body {
+    display: grid;
+    grid-template-areas:
+    "house"
+    "hand"
+    "buttons";
+    grid-template-rows: 1fr 1fr auto;
+}
+
+#houseDiv {
+    grid-area: house;
+    display: flex;
+    justify-content: center;
+}
+
+#handDiv {
+    grid-area: hand;
+    display: flex;
+    justify-content: center;
+}
+
+#buttons {
+    grid-area: buttons;
+    display: flex;
+    justify-content: center;
+}
