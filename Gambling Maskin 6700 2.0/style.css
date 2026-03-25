@@ -6,10 +6,21 @@ playing-card {
 body {
     display: grid;
     grid-template-areas:
-    "house"
-    "hand"
-    "buttons";
-    grid-template-rows: 1fr 1fr auto;
+    "house houseSum"
+    "hand handSum"
+    "buttons betting";
+    grid-template-rows: 1fr 1fr 2rem;
+    grid-template-columns: 1fr 1fr;
+}
+
+#houseSum {
+    grid-area: houseSum;
+    font-size: 4rem;
+}
+
+#handSum {
+    grid-area: handSum;
+    font-size: 4rem;
 }
 
 #houseDiv {
@@ -29,3 +40,4 @@ body {
     display: flex;
     justify-content: center;
 }
+
