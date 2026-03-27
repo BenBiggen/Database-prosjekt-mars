@@ -8,7 +8,8 @@ body {
     grid-template-areas:
     "house houseSum"
     "hand handSum"
-    "buttons betting";
+    "buttons betting"
+    "alert account";
     grid-template-rows: 1fr 1fr 2rem;
     grid-template-columns: 1fr 1fr;
 }
@@ -41,3 +42,9 @@ body {
     justify-content: center;
 }
 
+#alert {
+    grid-area: alert;
+    display: flex;
+    justify-content: center;
+    font-size: 4rem;
+}

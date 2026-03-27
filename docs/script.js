@@ -22,6 +22,7 @@ const sumSide = {
   house: document.getElementById("houseSum"),
   hand: document.getElementById("handSum"),
 };
+const alertSide = document.getElementById("alert");
 
 hitButton.addEventListener("click", () => {
   hit();
@@ -61,13 +62,13 @@ sumSide.house.innerText = sumHand(house) - deckValue[randomHouse];
 sumSide.hand.innerText = sumHand(hand);
 
 if ((sumHand(house) === 21) & (sumHand(house) === sumHand(hand))) {
-  alert("PUSH");
+  alertSide.innerText = "PUSH";
 } else {
   if (sumHand(hand) === 21) {
-    alert("Du har Blackjack!");
+    alertSide.innerText = "Blackjack!";
   } else {
     if (sumHand(house) === 21) {
-      alert("Huset har blackjack, du tapte");
+      alertSide.innerText = "Huset vinner";
     }
   }
 }
@@ -80,7 +81,7 @@ function hit() {
   cardPull(hand, handDiv);
 
   if (sumHand(hand) > 21) {
-    console.log("Du har bustet");
+    alertSide.innerText = "Bust";
   }
 
   sumSide.hand.innerText = sumHand(hand);
@@ -96,9 +97,21 @@ function stand() {
     cardPull(house, houseDiv);
   }
 
+  sumSide.house.innerText = sumHand(house);
+
   if (sumHand(house) > 21) {
-    console.log("Huset har gått bust");
+    alertSide.innerText = "Du Vant!";
   }
 
-  sumSide.house.innerText = sumHand(house);
+  if (sumHand(house)===sumHand(hand) & sumHand(house)<=21 & sumHand(hand)<=21) {
+    alertSide.innerText = "PUSH"
+  } else {
+    if (sumHand(house)>sumHand(hand) & sumHand(house)<=21 & sumHand(hand)<=21) {
+      alertSide.innerText = "Huset vinner"
+    } else {
+      if (sumHand(house)<sumHand(hand) & sumHand(house)<=21 & sumHand(hand)<=21) {
+        alertSide.innerText = "Du Vant!"
+      }
+    }
+  }
 }
