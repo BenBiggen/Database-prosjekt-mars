@@ -23,6 +23,11 @@ const sumSide = {
   hand: document.getElementById("handSum"),
 };
 const alertSide = document.getElementById("alert");
+const essListe = ["As", "Ah", "Ad", "Ac"]
+
+function inludererEss(position){
+  return essListe.some(ess => position.includes(ess))
+}
 
 hitButton.addEventListener("click", () => {
   hit();
@@ -61,7 +66,7 @@ houseDiv.appendChild(handSide);
 sumSide.house.innerText = sumHand(house) - deckValue[randomHouse];
 sumSide.hand.innerText = sumHand(hand);
 
-if ((sumHand(house) === 21) & (sumHand(house) === sumHand(hand))) {
+if ((sumHand(house) === 21) && (sumHand(house) === sumHand(hand))) {
   alertSide.innerText = "PUSH";
 } else {
   if (sumHand(hand) === 21) {
@@ -74,7 +79,25 @@ if ((sumHand(house) === 21) & (sumHand(house) === sumHand(hand))) {
 }
 
 function sumHand(hand) {
-  return hand.reduce((sum, cardName) => sum + deckValue[cardName], 0);
+  let sum = 0;
+  let aceCount = 0;
+
+  for (let card of hand) {
+    sum += deckValue[card];
+
+    // Count Aces
+    if (card[0] === "A") {
+      aceCount++;
+    }
+  }
+
+  // Convert Aces from 11 → 1 if needed
+  while (sum > 21 && aceCount > 0) {
+    sum -= 10;
+    aceCount--;
+  }
+
+  return sum;
 }
 
 function hit() {
@@ -99,19 +122,18 @@ function stand() {
 
   sumSide.house.innerText = sumHand(house);
 
-  if (sumHand(house) > 21) {
+  if (sumHand(house) > 21 && sumHand(hand)<=21) {
     alertSide.innerText = "Du Vant!";
   }
 
-  if (sumHand(house)===sumHand(hand) & sumHand(house)<=21 & sumHand(hand)<=21) {
+  
+
+//linjen under! For house bruk enten sumHouseEss eller sumHand(house) og samme for hand men hand i stedet for house
+if (sumHand(house)===sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21) {
     alertSide.innerText = "PUSH"
-  } else {
-    if (sumHand(house)>sumHand(hand) & sumHand(house)<=21 & sumHand(hand)<=21) {
-      alertSide.innerText = "Huset vinner"
-    } else {
-      if (sumHand(house)<sumHand(hand) & sumHand(house)<=21 & sumHand(hand)<=21) {
-        alertSide.innerText = "Du Vant!"
+    } else if (sumHand(house)>sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21){
+        alertSide.innerText = "Huset vinner"
+      } else if (sumHand(house)<sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21){
+          alertSide.innerText = "Du Vant!"
+        }
       }
-    }
-  }
-}
