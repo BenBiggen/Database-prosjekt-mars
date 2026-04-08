@@ -89,6 +89,8 @@ function hit() {
 
   if (sumHand(hand) > 21) {
     alertSide.innerText = "Bust";
+    gameStartEnd(false, "grey")
+    revealHouse();
   }
 
   sumSide.hand.innerText = sumHand(hand);
