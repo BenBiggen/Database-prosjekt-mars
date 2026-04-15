@@ -1,4 +1,4 @@
-let originalDeck = [ 
+const originalDeck = [ 
 "As","Ks","Qs","Js","Ts","9s","8s","7s","6s","5s","4s","3s","2s",
 "Ah","Kh","Qh","Jh","Th","9h","8h","7h","6h","5h","4h","3h","2h",
 "Ad","Kd","Qd","Jd","Td","9d","8d","7d","6d","5d","4d","3d","2d",
@@ -14,6 +14,8 @@ const deckValue = {
   "Ac": 11, "Kc": 10, "Qc": 10, "Jc": 10, "Tc": 10, "9c": 9, "8c": 8, "7c": 7, "6c": 6, "5c": 5, "4c": 4, "3c": 3, "2c": 2
 };
 
+let wager = 0;
+let account = 1000;
 let hand = [];
 let house = [];
 let randomHouse;
@@ -24,6 +26,14 @@ const houseDiv = document.getElementById("houseDiv");
 const hitButton = document.getElementById("hit");
 const standButton = document.getElementById("stand");
 const playButton = document.getElementById("play");
+const betButton = {
+  10: document.getElementById("10"),
+  25: document.getElementById("25"),
+  50: document.getElementById("50"),
+  100: document.getElementById("100"),
+}
+const wageSide = document.getElementById("wager")
+const accountSide = document.getElementById("account")
 const sumSide = {
   house: document.getElementById("houseSum"),
   hand: document.getElementById("handSum"),
@@ -41,6 +51,55 @@ standButton.addEventListener("click", () => {
 playButton.addEventListener("click", () => {
   play();
 });
+
+updateAccount();
+gameStartEnd(false, "grey");
+
+for (let n = 1; n <= 2; n++) {
+    placeholderCards(houseDiv);
+    placeholderCards(handDiv);
+}
+  
+
+function placeholderCards(positionDiv) {
+  let handSide = document.createElement("playing-card");
+  handSide.setAttribute("rank", `0`);
+  positionDiv.appendChild(handSide);
+}
+
+function updateAccount(){
+  wageSide.innerText = "innsats: $" + wager;
+  accountSide.innerText = "konto: $" + account;
+}
+
+function betting(bet) {
+  if (account<bet) {
+  alert("Du har ikke nok penger >:(");
+  } else if (gameActive){
+    alert("Du kan ikke vedde mens spillet er aktivt >:(")
+  } else {
+    account-=bet;
+    wager+=bet;
+    console.log(wager);
+    updateAccount();
+  }
+}
+
+betButton[10].addEventListener("click", ()=>{
+  betting(10);
+})
+
+betButton[25].addEventListener("click", ()=>{
+  betting(25);
+})
+
+betButton[50].addEventListener("click", ()=>{
+  betting(50);
+})
+
+betButton[100].addEventListener("click", ()=>{
+  betting(100);
+})
 
 function cardPull(position, positionDiv) {
   let randomHand = deck[Math.floor(Math.random() * deck.length)];
@@ -89,8 +148,11 @@ function hit() {
 
   if (sumHand(hand) > 21) {
     alertSide.innerText = "Bust";
-    gameStartEnd(false, "grey")
+    wager=0;
+    updateAccount();
+    gameStartEnd(false, "grey");
     revealHouse();
+    sumSide.house.innerText = sumHand(house);
   }
 
   sumSide.hand.innerText = sumHand(hand);
@@ -109,16 +171,21 @@ function stand() {
 
   if (sumHand(house) > 21 && sumHand(hand)<=21) {
     alertSide.innerText = "Du Vant!";
+    account+=(wager*2)
   }
 
   if (sumHand(house)===sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21) {
     alertSide.innerText = "PUSH"
+    account+=wager
     } else if (sumHand(house)>sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21){
         alertSide.innerText = "Huset vinner"
       } else if (sumHand(house)<sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21){
           alertSide.innerText = "Du Vant!"
+          account+=(wager*2)
         }
   gameStartEnd(false, "grey")
+  wager = 0;
+  updateAccount();
       }
 
 function gameStartEnd(boolean, color){
@@ -157,24 +224,30 @@ function play(){
 
   if ((sumHand(house) === 21) && (sumHand(house) === sumHand(hand))) {
     alertSide.innerText = "PUSH";
+    account+=wager;
+    wager=0;
+    updateAccount();
     revealHouse();
     sumSide.house.innerText = sumHand(house);
-    gameStartEnd(false, "grey")
+    gameStartEnd(false, "grey");
   } else {
     if (sumHand(hand) === 21) {
       alertSide.innerText = "Blackjack!";
+      account+=(wager*2.5);
+      wager=0;
+      updateAccount();
       revealHouse();
       sumSide.house.innerText = sumHand(house);
-      gameStartEnd(false, "grey")
+      gameStartEnd(false, "grey");
     } else {
       if (sumHand(house) === 21) {
         alertSide.innerText = "Huset vinner";
+        wager=0;
+        updateAccount();
         revealHouse();
         sumSide.house.innerText = sumHand(house);
-        gameStartEnd(false, "grey")
+        gameStartEnd(false, "grey");
       }
     }
   }
 }
-
-play();
