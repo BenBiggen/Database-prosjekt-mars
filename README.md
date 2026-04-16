@@ -25,7 +25,13 @@ Backend:
 
 Leaderboard
 
-Lagring av penger
+Lagring av penger (fungerer for en bruker nå)
 
 Brukere
+
+FIKS BUG HVOR HELE DOM BLIR REFRESHET NÅR EN RUNDE ER OVER (LEGG TIL AWAIT FORAN ASYNC FUNKSJONER)
+
+Fiks sånn at man kan bytte mellom brukere og at det vises.
+
+Gjøre sånn at games og sessions faktisk blir tracket
 

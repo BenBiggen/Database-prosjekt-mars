@@ -14,12 +14,14 @@ const deckValue = {
   "Ac": 11, "Kc": 10, "Qc": 10, "Jc": 10, "Tc": 10, "9c": 9, "8c": 8, "7c": 7, "6c": 6, "5c": 5, "4c": 4, "3c": 3, "2c": 2
 };
 
+let user_id = 1;
 let wager = 0;
-let account = 1000;
 let hand = [];
 let house = [];
+let account = 0;
 let randomHouse;
 let handSide;
+let change;
 let gameActive = false;
 const handDiv = document.getElementById("handDiv");
 const houseDiv = document.getElementById("houseDiv");
@@ -40,6 +42,26 @@ const sumSide = {
 };
 const alertSide = document.getElementById("alert");
 
+async function fetchBalance(user_id){
+  try {
+    const res = await fetch(`http://localhost:3000/api/balance/${user_id}`);
+
+    if (!res.ok) {
+      throw new Error("API error: " + res.status);
+    }
+
+    const data = await res.json();
+
+    account = data.balance;
+    updateAccount();
+
+  } catch (err) {
+    console.error("Fetch failed:", err);
+  }
+}
+
+fetchBalance(user_id)
+
 hitButton.addEventListener("click", () => {
   hit();
 });
@@ -52,15 +74,27 @@ playButton.addEventListener("click", () => {
   play();
 });
 
-updateAccount();
 gameStartEnd(false, "grey");
 
 for (let n = 1; n <= 2; n++) {
     placeholderCards(houseDiv);
     placeholderCards(handDiv);
 }
-  
 
+async function updateBalance(change) {
+  const res = await fetch("http://localhost:3000/api/update_balance", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: 1,
+      change
+    })
+  });
+
+  if (!res.ok) throw new Error("update failed");
+  return res.json();
+}
+  
 function placeholderCards(positionDiv) {
   let handSide = document.createElement("playing-card");
   handSide.setAttribute("rank", `0`);
@@ -148,6 +182,8 @@ function hit() {
 
   if (sumHand(hand) > 21) {
     alertSide.innerText = "Bust";
+    change=-wager;
+    updateBalance(change);
     wager=0;
     updateAccount();
     gameStartEnd(false, "grey");
@@ -172,6 +208,8 @@ function stand() {
   if (sumHand(house) > 21 && sumHand(hand)<=21) {
     alertSide.innerText = "Du Vant!";
     account+=(wager*2)
+    change=wager
+    updateBalance(change)
   }
 
   if (sumHand(house)===sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21) {
@@ -179,8 +217,12 @@ function stand() {
     account+=wager
     } else if (sumHand(house)>sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21){
         alertSide.innerText = "Huset vinner"
+        change=-wager
+        updateBalance(change)
       } else if (sumHand(house)<sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21){
           alertSide.innerText = "Du Vant!"
+          change=wager
+          updateBalance(change)
           account+=(wager*2)
         }
   gameStartEnd(false, "grey")
@@ -234,6 +276,8 @@ function play(){
     if (sumHand(hand) === 21) {
       alertSide.innerText = "Blackjack!";
       account+=(wager*2.5);
+      change=(wager*1.5)
+      updateBalance(change)
       wager=0;
       updateAccount();
       revealHouse();
@@ -242,6 +286,8 @@ function play(){
     } else {
       if (sumHand(house) === 21) {
         alertSide.innerText = "Huset vinner";
+        change=-wager
+        updateBalance(change)
         wager=0;
         updateAccount();
         revealHouse();
