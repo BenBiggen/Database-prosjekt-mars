@@ -14,11 +14,11 @@ const deckValue = {
   "Ac": 11, "Kc": 10, "Qc": 10, "Jc": 10, "Tc": 10, "9c": 9, "8c": 8, "7c": 7, "6c": 6, "5c": 5, "4c": 4, "3c": 3, "2c": 2
 };
 
-let user_id = 1;
 let wager = 0;
 let hand = [];
 let house = [];
 let account = 0;
+let user_id;
 let randomHouse;
 let handSide;
 let change;
@@ -41,6 +41,8 @@ const sumSide = {
   hand: document.getElementById("handSum"),
 };
 const alertSide = document.getElementById("alert");
+const userConfirm = document.getElementById("userConfirm");
+
 
 async function fetchBalance(user_id){
   try {
@@ -60,39 +62,66 @@ async function fetchBalance(user_id){
   }
 }
 
-fetchBalance(user_id)
 
-hitButton.addEventListener("click", () => {
+hitButton.addEventListener("click", (event) => {
+  event.preventDefault();  // Stopper form-submit og reload
   hit();
 });
 
-standButton.addEventListener("click", () => {
+standButton.addEventListener("click", (event) => {
+  event.preventDefault();  // Stopper form-submit og reload
   stand();
 });
 
-playButton.addEventListener("click", () => {
+playButton.addEventListener("click", (event) => {
+  event.preventDefault();  // Stopper form-submit og reload
   play();
 });
 
+userConfirm.addEventListener("click", (event) => {
+  event.preventDefault();  // Stopper form-submit og reload
+  console.log(document.getElementById("users").value)
+  selectUser();
+  updateAccount();
+});
+
+
 gameStartEnd(false, "grey");
+updateAccount();
 
 for (let n = 1; n <= 2; n++) {
     placeholderCards(houseDiv);
     placeholderCards(handDiv);
 }
 
-async function updateBalance(change) {
-  const res = await fetch("http://localhost:3000/api/update_balance", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      user_id: 1,
-      change
-    })
-  });
+function selectUser() {
+  const select = document.getElementById("users");
+  user_id = select.value;
+  fetchBalance(user_id);
+  document.getElementById("currentUser").innerText = ("Current user: " + user_id)
+}
 
-  if (!res.ok) throw new Error("update failed");
-  return res.json();
+async function updateBalance(change) {
+  try {
+    const res = await fetch("http://localhost:3000/api/update_balance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: user_id,
+        change
+      })
+    });
+
+    if (!res.ok) {
+      console.error("Server error:", res.status);
+      return;
+    }
+
+    return await res.json();
+
+  } catch (err) {
+    console.error("Fetch crashed:", err);
+  }
 }
   
 function placeholderCards(positionDiv) {
@@ -119,21 +148,25 @@ function betting(bet) {
   }
 }
 
-betButton[10].addEventListener("click", ()=>{
+betButton[10].addEventListener("click", (event) => {
+  event.preventDefault();  // Stopper form-submit og reload
   betting(10);
-})
+});
 
-betButton[25].addEventListener("click", ()=>{
+betButton[25].addEventListener("click", (event) => {
+  event.preventDefault();  // Stopper form-submit og reload
   betting(25);
-})
+});
 
-betButton[50].addEventListener("click", ()=>{
+betButton[50].addEventListener("click", (event) => {
+  event.preventDefault();  // Stopper form-submit og reload
   betting(50);
-})
+});
 
-betButton[100].addEventListener("click", ()=>{
+betButton[100].addEventListener("click", (event) => {
+  event.preventDefault();  // Stopper form-submit og reload
   betting(100);
-})
+});
 
 function cardPull(position, positionDiv) {
   let randomHand = deck[Math.floor(Math.random() * deck.length)];
@@ -147,7 +180,12 @@ function cardPull(position, positionDiv) {
 }
 
 function revealHouse() {
-  houseDiv.removeChild(handSide);
+  if (handSide && houseDiv.contains(handSide)) {
+    houseDiv.removeChild(handSide);
+  }
+
+  if (!randomHouse) return;
+
   let houseSide = document.createElement("playing-card");
   houseSide.setAttribute("cid", `${randomHouse}`);
   houseDiv.appendChild(houseSide);
@@ -175,7 +213,7 @@ function sumHand(hand) {
   return sum;
 }
 
-function hit() {
+async function hit() {
   if (!gameActive) return;
 
   cardPull(hand, handDiv);
@@ -183,7 +221,7 @@ function hit() {
   if (sumHand(hand) > 21) {
     alertSide.innerText = "Bust";
     change=-wager;
-    updateBalance(change);
+    await updateBalance(change);
     wager=0;
     updateAccount();
     gameStartEnd(false, "grey");
@@ -194,7 +232,7 @@ function hit() {
   sumSide.hand.innerText = sumHand(hand);
 }
 
-function stand() {
+async function stand() {
   if (!gameActive) return;
 
   revealHouse();
@@ -209,7 +247,7 @@ function stand() {
     alertSide.innerText = "Du Vant!";
     account+=(wager*2)
     change=wager
-    updateBalance(change)
+    await updateBalance(change); 
   }
 
   if (sumHand(house)===sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21) {
@@ -218,11 +256,11 @@ function stand() {
     } else if (sumHand(house)>sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21){
         alertSide.innerText = "Huset vinner"
         change=-wager
-        updateBalance(change)
+        await updateBalance(change);
       } else if (sumHand(house)<sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21){
           alertSide.innerText = "Du Vant!"
           change=wager
-          updateBalance(change)
+          await updateBalance(change); 
           account+=(wager*2)
         }
   gameStartEnd(false, "grey")
@@ -236,7 +274,7 @@ function gameStartEnd(boolean, color){
   standButton.style.backgroundColor = `${color}`
 }
 
-function play(){
+async function play(){
   gameStartEnd(true, "whitesmoke")
   deck=[...originalDeck]
 
@@ -277,7 +315,7 @@ function play(){
       alertSide.innerText = "Blackjack!";
       account+=(wager*2.5);
       change=(wager*1.5)
-      updateBalance(change)
+      await updateBalance(change);
       wager=0;
       updateAccount();
       revealHouse();
@@ -287,7 +325,7 @@ function play(){
       if (sumHand(house) === 21) {
         alertSide.innerText = "Huset vinner";
         change=-wager
-        updateBalance(change)
+        await updateBalance(change);
         wager=0;
         updateAccount();
         revealHouse();

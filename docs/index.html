@@ -12,20 +12,31 @@
         <div id="houseDiv"></div>
         <div id="handDiv"></div>
         <div id="buttons">
-            <button id="hit">HIT</button>
-            <button id="stand">STAND</button>
-            <button id="play">SPILL</button>
+            <button type="button" id="hit">HIT</button>
+            <button type="button" id="stand">STAND</button>
+            <button type="button" id="play">SPILL</button>
         </div>
         <div id="alert"></div>
         <div id="betting">
             <h1>BETTING: </h1>
-            <button id="10">$10</button>
-            <button id="25">$25</button>
-            <button id="50">$50</button>
-            <button id="100">$100</button>
+            <button type="button" id="10">$10</button>
+            <button type="button" id="25">$25</button>
+            <button type="button" id="50">$50</button>
+            <button type="button" id="100">$100</button>
         </div>
         <div id="wager"></div>
         <div id="account"></div>
+        <div id="userCheck">
+            <select name="users" id="users">
+                <option value="1">user1</option>
+                <option value="2">user2</option>
+                <option value="3">user3</option>
+                <option value="4">user4</option>
+            </select>
+            <button type="button" id="userConfirm">confirm user</button>
+            <div id="currentUser"></div>
+            <button type="button" id="userInfo" onclick="window.location.href='userInfo.html'">user INFO</button>
+        </div>
     <houseSum id="houseSum"></houseSum>
     <handSum id="handSum"></handSum>
 </body>

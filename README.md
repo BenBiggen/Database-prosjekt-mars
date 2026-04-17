@@ -19,19 +19,12 @@ TING Å FIKSE:
 
 Hvis huset får to esser vises det 1, må fikse sånn at det vises som 11 før andre kortet blir snudd
 
-Betting system og pengesystem
-
 Backend:
 
-Leaderboard
+GJØR SÅNN AT USER INFO VISER USERNAME, ANTALL GAMES SPILLT, ANTALL SESSIONS og HVOR MYE MAN HAR VUNNET OG TAPT TOTALT
 
-Lagring av penger (fungerer for en bruker nå)
+GJØR SÅNN AT GAMES OG SESSIONS BLIR TRACKET OG LAGRET I DATABASEN
 
-Brukere
+Leaderboard (hvis jeg har tid)
 
-FIKS BUG HVOR HELE DOM BLIR REFRESHET NÅR EN RUNDE ER OVER (LEGG TIL AWAIT FORAN ASYNC FUNKSJONER)
-
-Fiks sånn at man kan bytte mellom brukere og at det vises.
-
-Gjøre sånn at games og sessions faktisk blir tracket
-
+Legge til achievements (hvis jeg har tid)
