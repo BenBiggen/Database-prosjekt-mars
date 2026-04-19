@@ -1,0 +1,57 @@
+body {
+    background-color: aliceblue;
+    margin: 0;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "header"
+        "updateInfo"
+        "usernameInfo"
+        "gameswonInfo"
+        "gameslostInfo"
+        "returnBlackjack";
+    gap: 10px; 
+    justify-items: center; 
+}
+
+header {
+    grid-area: header;
+    color: rgb(203, 0, 0);
+    text-align: center;
+}
+
+#usernameInfo,
+#gameswonInfo,
+#gameslostInfo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+#returnBlackjack {
+    grid-area: returnBlackjack;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#usernameInfo {
+    grid-area: usernameInfo;
+}
+
+#gameswonInfo {
+    grid-area: gameswonInfo;
+}
+
+#gameslostInfo {
+    grid-area: gameslostInfo;
+}
+
+#updateInfo {
+    grid-area: updateInfo;
+}

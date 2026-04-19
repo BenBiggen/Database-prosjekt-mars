@@ -5,11 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Info</title>
     <script src='elements.cardmeister.full.js' defer></script>
-    <script src='script.js' defer></script>
+    <script src='userInfoScript.js' defer></script>
     <link rel="stylesheet" href="userInfoStyle.css">
 </head>
 <body>
-    <h1>USER INFO</h1>
-    <button type="button" id="returnBlackjack" onclick="window.location.href='index.html'">TILBAKE</button>
+    <main>
+        <header id="header">
+            <h1>USER INFO</h1>
+        </header>
+        <button type="button" id="updateInfo">OPPDATER</button>
+        <div id="usernameInfo"></div>
+        <div id="gameswonInfo"></div>
+        <div id="gameslostInfo"></div>
+        <button type="button" id="returnBlackjack" onclick="window.location.href='index.html'">TILBAKE</button>
+    </main>
+    
 </body>
 </html>

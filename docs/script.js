@@ -19,6 +19,8 @@ let hand = [];
 let house = [];
 let account = 0;
 let user_id;
+let currentSessionId = null;
+let sessionStarted = false;
 let randomHouse;
 let handSide;
 let change;
@@ -62,6 +64,77 @@ async function fetchBalance(user_id){
   }
 }
 
+async function startSession() {
+  if (!user_id) return null;
+
+  try {
+    const res = await fetch("http://localhost:3000/api/session/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id, start_balance: account })
+    });
+
+    if (!res.ok) {
+      throw new Error("API error: " + res.status);
+    }
+
+    const data = await res.json();
+    currentSessionId = data.session_id;
+    sessionStarted = true;
+    return currentSessionId;
+  } catch (err) {
+    console.error("Session start failed:", err);
+    return null;
+  }
+}
+
+async function logGame(bet, result, amount_change) {
+  if (!currentSessionId) return;
+
+  try {
+    const res = await fetch("http://localhost:3000/api/game", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session_id: currentSessionId,
+        bet,
+        result,
+        amount_change
+      })
+    });
+
+    if (!res.ok) {
+      throw new Error("API error: " + res.status);
+    }
+
+    return await res.json();
+    const data = await res.json();
+  } catch (err) {
+    console.error("Log game failed:", err);
+  }
+}
+
+async function endSession(end_balance) {
+  if (!currentSessionId) return;
+
+  try {
+    const res = await fetch("http://localhost:3000/api/session/end", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: currentSessionId, end_balance })
+    });
+
+    if (!res.ok) {
+      throw new Error("API error: " + res.status);
+    }
+
+    await res.json();
+    currentSessionId = null;
+    sessionStarted = false;
+  } catch (err) {
+    console.error("End session failed:", err);
+  }
+}
 
 hitButton.addEventListener("click", (event) => {
   event.preventDefault();  // Stopper form-submit og reload
@@ -99,6 +172,7 @@ function selectUser() {
   user_id = select.value;
   fetchBalance(user_id);
   document.getElementById("currentUser").innerText = ("Current user: " + user_id)
+  localStorage.setItem("user_id", user_id);
 }
 
 async function updateBalance(change) {
@@ -222,6 +296,7 @@ async function hit() {
     alertSide.innerText = "Bust";
     change=-wager;
     await updateBalance(change);
+    await logGame(wager, "lose", change);
     wager=0;
     updateAccount();
     gameStartEnd(false, "grey");
@@ -243,30 +318,41 @@ async function stand() {
 
   sumSide.house.innerText = sumHand(house);
 
+  let outcome = "lose";
+  let amountChange = 0;
+
   if (sumHand(house) > 21 && sumHand(hand)<=21) {
     alertSide.innerText = "Du Vant!";
     account+=(wager*2)
     change=wager
+    amountChange = change;
+    outcome = "win";
     await updateBalance(change); 
-  }
-
-  if (sumHand(house)===sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21) {
+  } else if (sumHand(house)===sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21) {
     alertSide.innerText = "PUSH"
     account+=wager
-    } else if (sumHand(house)>sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21){
-        alertSide.innerText = "Huset vinner"
-        change=-wager
-        await updateBalance(change);
-      } else if (sumHand(house)<sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21){
-          alertSide.innerText = "Du Vant!"
-          change=wager
-          await updateBalance(change); 
-          account+=(wager*2)
-        }
+    outcome = "push";
+    amountChange = 0;
+  } else if (sumHand(house)>sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21){
+    alertSide.innerText = "Huset vinner"
+    change=-wager
+    amountChange = change;
+    outcome = "lose";
+    await updateBalance(change);
+  } else if (sumHand(house)<sumHand(hand) && sumHand(house)<=21 && sumHand(hand)<=21){
+    alertSide.innerText = "Du Vant!"
+    change=wager
+    amountChange = change;
+    outcome = "win";
+    await updateBalance(change); 
+    account+=(wager*2)
+  }
+
+  await logGame(wager, outcome, amountChange);
   gameStartEnd(false, "grey")
   wager = 0;
   updateAccount();
-      }
+}
 
 function gameStartEnd(boolean, color){
   gameActive = boolean;
@@ -275,6 +361,15 @@ function gameStartEnd(boolean, color){
 }
 
 async function play(){
+  if (!user_id) {
+    alert("Velg bruker før du starter et spill.");
+    return;
+  }
+
+  if (!sessionStarted) {
+    await startSession();
+  }
+
   gameStartEnd(true, "whitesmoke")
   deck=[...originalDeck]
 
@@ -305,6 +400,7 @@ async function play(){
   if ((sumHand(house) === 21) && (sumHand(house) === sumHand(hand))) {
     alertSide.innerText = "PUSH";
     account+=wager;
+    await logGame(wager, "push", 0);
     wager=0;
     updateAccount();
     revealHouse();
@@ -316,6 +412,7 @@ async function play(){
       account+=(wager*2.5);
       change=(wager*1.5)
       await updateBalance(change);
+      await logGame(wager, "blackjack", change);
       wager=0;
       updateAccount();
       revealHouse();
@@ -326,6 +423,7 @@ async function play(){
         alertSide.innerText = "Huset vinner";
         change=-wager
         await updateBalance(change);
+        await logGame(wager, "lose", change);
         wager=0;
         updateAccount();
         revealHouse();

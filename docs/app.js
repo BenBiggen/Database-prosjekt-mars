@@ -52,8 +52,75 @@ app.post("/api/update_balance", (req, res) => {
     }
 });
 
+app.post("/api/session/start", (req, res) => {
+    const { user_id, start_balance } = req.body;
+
+    try {
+        const stmt = db.prepare(`
+            INSERT INTO sessions (user_id, start_balance, started_at)
+            VALUES (?, ?, datetime('now'))
+        `);
+        const info = stmt.run(user_id, start_balance);
+        res.json({ success: true, session_id: info.lastInsertRowid });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post("/api/game", (req, res) => {
+    const { session_id, bet, result, amount_change } = req.body;
+
+    try {
+        const stmt = db.prepare(`
+            INSERT INTO games (session_id, bet, result, amount_change, played_at)
+            VALUES (?, ?, ?, ?, datetime('now'))
+        `);
+        stmt.run(session_id, bet, result, amount_change);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post("/api/session/end", (req, res) => {
+    const { session_id, end_balance } = req.body;
+
+    try {
+        const stmt = db.prepare(`
+            UPDATE sessions
+            SET end_balance = ?, ended_at = datetime('now')
+            WHERE session_id = ?
+        `);
+        stmt.run(end_balance, session_id);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get("/api/balance/:id", (req, res) => {
     const row = db.prepare("SELECT balance FROM user WHERE user_id = ?")
+                  .get(req.params.id);
+
+    res.json(row);
+});
+
+app.get("/api/username/:id", (req, res) => {
+    const row = db.prepare("SELECT username FROM user WHERE user_id = ?")
+                  .get(req.params.id);
+
+    res.json(row);
+});
+
+app.get("/api/total_won/:id", (req, res) => {
+    const row = db.prepare("SELECT total_won FROM user WHERE user_id = ?")
+                  .get(req.params.id);
+
+    res.json(row);
+});
+
+app.get("/api/total_lost/:id", (req, res) => {
+    const row = db.prepare("SELECT total_lost FROM user WHERE user_id = ?")
                   .get(req.params.id);
 
     res.json(row);

@@ -17,14 +17,12 @@ let benjamin = "sigma"
 
 TING Å FIKSE:
 
-Hvis huset får to esser vises det 1, må fikse sånn at det vises som 11 før andre kortet blir snudd
 
 Backend:
 
-GJØR SÅNN AT USER INFO VISER USERNAME, ANTALL GAMES SPILLT, ANTALL SESSIONS og HVOR MYE MAN HAR VUNNET OG TAPT TOTALT
-
-GJØR SÅNN AT GAMES OG SESSIONS BLIR TRACKET OG LAGRET I DATABASEN
+GJØRE FERDIG LOGGING AV GAMES / SESSIONS, TRACKER SESSIONS NÅ MEN DE ENDER ALDRI (kanskje en knapp for å ende) og FUNKSJONEN FOR LOGGAME FUNGERER IKKE SÅ MÅ FIKSES
 
 Leaderboard (hvis jeg har tid)
 
 Legge til achievements (hvis jeg har tid)
+
