@@ -1,5 +1,4 @@
 body {
-    background-color: aliceblue;
     margin: 0;
 }
 
@@ -19,7 +18,6 @@ main {
 
 header {
     grid-area: header;
-    color: rgb(203, 0, 0);
     text-align: center;
 }
 

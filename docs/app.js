@@ -16,24 +16,9 @@ app.use(express.static('public'));
 const cors = require('cors');
 app.use(cors());
 
-// Eksempel på en rute som henter alle fjell og hoydene deres
-app.get('/api/user_info', (req, res) => {
-    const rows = db.prepare(`
-        SELECT games.*
-        FROM user
-        JOIN sessions ON user.user_id = sessions.user_id
-        JOIN games ON sessions.session_id = games.session_id`).all();
-    res.json(rows);
-});
+app.use(express.json()); //Gjør at koden automatisk kan lese JSON data fra forespørseler
 
-// Eksempel på en rute som henter alle brukernavnene til alle personene i databasen
-app.get('/api/personer_alle', (req, res) => {
-    const rows = db.prepare('SELECT username FROM user').all();
-    res.json(rows);
-});
-
-app.use(express.json()); // VIKTIG
-
+//Oppdaterer kontoen sånn at den blir lik den som vises i frontend
 app.post("/api/update_balance", (req, res) => {
     const { user_id, change } = req.body;
 
@@ -52,6 +37,47 @@ app.post("/api/update_balance", (req, res) => {
     }
 });
 
+//oppdaterer total mengde penger vunnet for en konto i databasen
+app.post("/api/total_won", (req, res) => {
+    
+    const { user_id, change } = req.body;
+
+    try {
+        const stmt = db.prepare(`
+            UPDATE user
+            SET total_won = total_won + ?
+            WHERE user_id = ?
+        `);
+
+        stmt.run(change, user_id);
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+//oppdaterer total mengde penger tapt for en konto i databasen
+app.post("/api/total_lost", (req, res) => {
+
+    const { user_id, change } = req.body;
+
+    try {
+        const stmt = db.prepare(`
+            UPDATE user
+            SET total_lost = total_lost + ?
+            WHERE user_id = ?
+        `);
+
+        stmt.run(change, user_id);
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+//oppretter en ny session i databasen med start verdi og user_id i tilegg til start tidspunkt, selv om det ikke blir brukt noe mer enn å bli lagret i databasen
 app.post("/api/session/start", (req, res) => {
     const { user_id, start_balance } = req.body;
 
@@ -67,12 +93,14 @@ app.post("/api/session/start", (req, res) => {
     }
 });
 
+
+//Logger runden som ble spillt inn i databasen med resultat av hvordan runden gikk
 app.post("/api/game", (req, res) => {
     const { session_id, bet, result, amount_change } = req.body;
 
     try {
         const stmt = db.prepare(`
-            INSERT INTO games (session_id, bet, result, amount_change, played_at)
+            INSERT INTO games (session_id, bet, result, amount_changed, played_at)
             VALUES (?, ?, ?, ?, datetime('now'))
         `);
         stmt.run(session_id, bet, result, amount_change);
@@ -82,6 +110,7 @@ app.post("/api/game", (req, res) => {
     }
 });
 
+//Ender session og logger endringer fra når den ble startet
 app.post("/api/session/end", (req, res) => {
     const { session_id, end_balance } = req.body;
 
@@ -98,6 +127,7 @@ app.post("/api/session/end", (req, res) => {
     }
 });
 
+//Lager en link så man kan fetche kontoverdien til en spesefikk user
 app.get("/api/balance/:id", (req, res) => {
     const row = db.prepare("SELECT balance FROM user WHERE user_id = ?")
                   .get(req.params.id);
@@ -105,6 +135,7 @@ app.get("/api/balance/:id", (req, res) => {
     res.json(row);
 });
 
+//Lager en link så man kan fetche brukernavnet til en spesefikk user
 app.get("/api/username/:id", (req, res) => {
     const row = db.prepare("SELECT username FROM user WHERE user_id = ?")
                   .get(req.params.id);
@@ -112,6 +143,7 @@ app.get("/api/username/:id", (req, res) => {
     res.json(row);
 });
 
+//Lager en link så man kan fetche total vunnet sum til en spesefikk user
 app.get("/api/total_won/:id", (req, res) => {
     const row = db.prepare("SELECT total_won FROM user WHERE user_id = ?")
                   .get(req.params.id);
@@ -119,6 +151,7 @@ app.get("/api/total_won/:id", (req, res) => {
     res.json(row);
 });
 
+//Lager en link så man kan fetche total tapt sum til en spesefikk user
 app.get("/api/total_lost/:id", (req, res) => {
     const row = db.prepare("SELECT total_lost FROM user WHERE user_id = ?")
                   .get(req.params.id);
